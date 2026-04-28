@@ -16,9 +16,6 @@ local Registry = {}
 local ConfigObjects = {} 
 local ThemeListeners = {}
 
--- ==========================================
--- 来自第一个文件的完整颜色系统 (Eternal Library)
--- ==========================================
 local Theme = {
     Background = Color3.fromRGB(20, 20, 28),
     Sidebar    = Color3.fromRGB(25, 25, 35),
@@ -267,9 +264,6 @@ local function createPulseGlow(object)
     }
 end
 
--- ==========================================
--- 更新后的 AddToRegistry 使用新的颜色系统
--- ==========================================
 local function AddToRegistry(obj, prop, themeKey)
     table.insert(Registry, {Object = obj, Property = prop, Type = themeKey})
     obj[prop] = CurrentTheme[themeKey]
@@ -733,27 +727,31 @@ function Fenglib:CreateWindow(Config)
 
     MainFrame.ClipsDescendants = false
 
+    -- ==========================================
+    -- 修正后的 Resizer：默认可见，带白色边框
+    -- ==========================================
     local Resizer = Instance.new("TextButton")
     Resizer.Name = "WindowResizer"
     Resizer.Parent = MainFrame
-    Resizer.BackgroundTransparency = 0.8
-    Resizer.BackgroundColor3 = CurrentTheme.Element
+    Resizer.BackgroundTransparency = 0
+    Resizer.BackgroundColor3 = Color3.fromRGB(255, 255, 255) -- 白色背景
     Resizer.Position = UDim2.new(1, 5, 1, 5)
     Resizer.Size = UDim2.new(0, 24, 0, 24)
     Resizer.AnchorPoint = Vector2.new(1, 1)
     Resizer.Text = ""
     Resizer.ZIndex = 30
-    Resizer.Visible = false
-
-    local stroke = Instance.new("UIStroke")
-    stroke.Thickness = 4
-    stroke.Color = CurrentTheme.Accent1
-    stroke.Transparency = 0
-    stroke.Parent = Resizer
-
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 6)
-    corner.Parent = Resizer
+    Resizer.Visible = true -- 默认可见
+    
+    -- 白色边框
+    local resizerStroke = Instance.new("UIStroke")
+    resizerStroke.Thickness = 2
+    resizerStroke.Color = Color3.fromRGB(255, 255, 255)
+    resizerStroke.Transparency = 0
+    resizerStroke.Parent = Resizer
+    
+    local resizerCorner = Instance.new("UICorner")
+    resizerCorner.CornerRadius = UDim.new(0, 6)
+    resizerCorner.Parent = Resizer
 
     local isResizing = false
     local resizeStart = Vector2.new(0,0)
@@ -1007,12 +1005,10 @@ function Fenglib:CreateWindow(Config)
         end
     end)
     
-    local resizerVisible = false
-    Resizer.Visible = resizerVisible
-    
+    -- 移除原有的 MaximizeBtn 逻辑，因为 Resizer 现在是始终可见的
+    -- 保留一个空的点击函数，但不再需要切换可见性
     local MaximizeBtn = createIconButton("rbxassetid://6031090998", function()
-        resizerVisible = not resizerVisible
-        Resizer.Visible = resizerVisible
+        -- Resizer 现在始终可见，不需要切换
     end)
     
     local CloseBtn = createTextButton("X", function()
