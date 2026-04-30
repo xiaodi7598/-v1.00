@@ -148,177 +148,6 @@ function Fenglib:LoadConfig(path)
     return true
 end
 
--- ==================== 渲染系统 ====================
--- 左侧Tab区域渲染效果
-local function renderLeftSidebar(frame)
-    -- 添加背景渐变
-    local bgGradient = Instance.new("UIGradient")
-    bgGradient.Name = "SidebarGradient"
-    bgGradient.Rotation = 180
-    bgGradient.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.new(0, 0, 0)),
-        ColorSequenceKeypoint.new(0.3, Color3.new(0.15, 0.15, 0.15)),
-        ColorSequenceKeypoint.new(1, Color3.new(0.3, 0.3, 0.3))
-    })
-    bgGradient.Transparency = NumberSequence.new({
-        NumberSequenceKeypoint.new(0, 0.85),
-        NumberSequenceKeypoint.new(0.5, 0.95),
-        NumberSequenceKeypoint.new(1, 0.98)
-    })
-    bgGradient.Enabled = true
-    bgGradient.Parent = frame
-
-    -- 左侧装饰线条
-    local decorLine = Instance.new("Frame")
-    decorLine.Name = "DecorLine"
-    decorLine.Size = UDim2.new(0, 2, 1, 0)
-    decorLine.Position = UDim2.new(0, 0, 0, 0)
-    decorLine.BackgroundColor3 = CurrentTheme.Accent
-    decorLine.BackgroundTransparency = 0.5
-    decorLine.BorderSizePixel = 0
-    decorLine.Parent = frame
-    AddToRegistry(decorLine, "BackgroundColor3", "Accent")
-
-    -- 装饰线渐变效果
-    local decorGradient = Instance.new("UIGradient")
-    decorGradient.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.new(1, 1, 1)),
-        ColorSequenceKeypoint.new(0.5, Color3.new(0.7, 0.7, 0.7)),
-        ColorSequenceKeypoint.new(1, Color3.new(1, 1, 1))
-    })
-    decorGradient.Transparency = NumberSequence.new({
-        NumberSequenceKeypoint.new(0, 0),
-        NumberSequenceKeypoint.new(0.3, 0.3),
-        NumberSequenceKeypoint.new(0.7, 0.3),
-        NumberSequenceKeypoint.new(1, 0)
-    })
-    decorGradient.Rotation = 90
-    decorGradient.Parent = decorLine
-
-    -- 呼吸光效动画
-    local hue = 0
-    task.spawn(function()
-        while decorLine.Parent do
-            hue = (hue + 0.005) % 1
-            local alpha = 0.3 + math.sin(tick() * 1.5) * 0.15
-            decorLine.BackgroundTransparency = 1 - alpha
-            RunService.RenderStepped:Wait()
-        end
-    end)
-
-    return decorLine
-end
-
--- 右侧内容区域渲染效果
-local function renderRightContent(frame)
-    -- 顶部光晕
-    local topGlow = Instance.new("Frame")
-    topGlow.Name = "TopGlow"
-    topGlow.Size = UDim2.new(1, 0, 0, 80)
-    topGlow.Position = UDim2.new(0, 0, 0, -40)
-    topGlow.BackgroundTransparency = 1
-    topGlow.BorderSizePixel = 0
-    topGlow.Parent = frame
-
-    local topGlowGradient = Instance.new("UIGradient")
-    topGlowGradient.Color = ColorSequence.new(Color3.new(1, 1, 1))
-    topGlowGradient.Transparency = NumberSequence.new({
-        NumberSequenceKeypoint.new(0, 1),
-        NumberSequenceKeypoint.new(0.5, 0.8),
-        NumberSequenceKeypoint.new(1, 1)
-    })
-    topGlowGradient.Parent = topGlow
-
-    -- 右侧边框发光
-    local rightBorder = Instance.new("Frame")
-    rightBorder.Name = "RightBorder"
-    rightBorder.Size = UDim2.new(0, 2, 1, 0)
-    rightBorder.Position = UDim2.new(1, 0, 0, 0)
-    rightBorder.BackgroundColor3 = CurrentTheme.Accent
-    rightBorder.BackgroundTransparency = 0.7
-    rightBorder.BorderSizePixel = 0
-    rightBorder.Parent = frame
-    AddToRegistry(rightBorder, "BackgroundColor3", "Accent")
-
-    local borderGradient = Instance.new("UIGradient")
-    borderGradient.Rotation = 90
-    borderGradient.Transparency = NumberSequence.new({
-        NumberSequenceKeypoint.new(0, 0.9),
-        NumberSequenceKeypoint.new(0.2, 0.3),
-        NumberSequenceKeypoint.new(0.5, 0.1),
-        NumberSequenceKeypoint.new(0.8, 0.3),
-        NumberSequenceKeypoint.new(1, 0.9)
-    })
-    borderGradient.Parent = rightBorder
-
-    -- 右下角光点
-    local cornerDot = Instance.new("Frame")
-    cornerDot.Name = "CornerDot"
-    cornerDot.Size = UDim2.new(0, 4, 0, 4)
-    cornerDot.Position = UDim2.new(1, 2, 1, 2)
-    cornerDot.BackgroundColor3 = CurrentTheme.Accent
-    cornerDot.BackgroundTransparency = 0.4
-    cornerDot.BorderSizePixel = 0
-    cornerDot.ZIndex = 5
-    cornerDot.Parent = frame
-    local dotCorner = Instance.new("UICorner")
-    dotCorner.CornerRadius = UDim.new(1, 0)
-    dotCorner.Parent = cornerDot
-    AddToRegistry(cornerDot, "BackgroundColor3", "Accent")
-
-    -- 光点呼吸动画
-    task.spawn(function()
-        while cornerDot.Parent do
-            local alpha = 0.3 + math.sin(tick() * 2) * 0.2
-            cornerDot.BackgroundTransparency = 1 - alpha
-            RunService.RenderStepped:Wait()
-        end
-    end)
-
-    return rightBorder, cornerDot
-end
-
--- 内容区域装饰光晕
-local function renderContentGlow(parent)
-    -- 左上角光点
-    local dot1 = Instance.new("Frame")
-    dot1.Size = UDim2.new(0, 6, 0, 6)
-    dot1.Position = UDim2.new(0, -3, 0, -3)
-    dot1.BackgroundColor3 = CurrentTheme.Accent
-    dot1.BackgroundTransparency = 0.6
-    dot1.BorderSizePixel = 0
-    dot1.ZIndex = 5
-    dot1.Parent = parent
-    local dot1Corner = Instance.new("UICorner")
-    dot1Corner.CornerRadius = UDim.new(1, 0)
-    dot1Corner.Parent = dot1
-    AddToRegistry(dot1, "BackgroundColor3", "Accent")
-
-    -- 右上角光点
-    local dot2 = Instance.new("Frame")
-    dot2.Size = UDim2.new(0, 6, 0, 6)
-    dot2.Position = UDim2.new(1, -3, 0, -3)
-    dot2.BackgroundColor3 = CurrentTheme.Accent
-    dot2.BackgroundTransparency = 0.6
-    dot2.BorderSizePixel = 0
-    dot2.ZIndex = 5
-    dot2.Parent = parent
-    local dot2Corner = Instance.new("UICorner")
-    dot2Corner.CornerRadius = UDim.new(1, 0)
-    dot2Corner.Parent = dot2
-    AddToRegistry(dot2, "BackgroundColor3", "Accent")
-
-    -- 光点动画
-    task.spawn(function()
-        while dot1.Parent do
-            local alpha = 0.4 + math.sin(tick() * 2.5) * 0.25
-            dot1.BackgroundTransparency = 1 - alpha
-            dot2.BackgroundTransparency = 1 - alpha
-            RunService.RenderStepped:Wait()
-        end
-    end)
-end
-
 function Fenglib:CreateWindow(Config)
     local Window = {}
     local Title = Config.Title or "FengY3"
@@ -668,10 +497,6 @@ function Fenglib:CreateWindow(Config)
     TabContainer.BackgroundTransparency = 1
     TabContainer.ScrollBarThickness = 0
     TabContainer.Parent = Content
-    
-    -- ========== 左侧Tab区域渲染 ==========
-    renderLeftSidebar(TabContainer)
-    
     local TabList = Instance.new("UIListLayout")
     TabList.Padding = UDim.new(0, 10)
     TabList.SortOrder = Enum.SortOrder.LayoutOrder
@@ -732,13 +557,10 @@ function Fenglib:CreateWindow(Config)
     PageContainer.Position = UDim2.new(0, 172, 0, 0)
     PageContainer.BackgroundTransparency = 1
     PageContainer.Parent = Content
-    
-    -- ========== 右侧内容区域渲染 ==========
-    renderRightContent(PageContainer)
 
     MainFrame.ClipsDescendants = false
 
-    -- Resizer（原文件一模一样）
+    -- Resizer（完全恢复原文件设置）
     local Resizer = Instance.new("TextButton")
     Resizer.Name = "WindowResizer"
     Resizer.Parent = MainFrame
@@ -1221,9 +1043,6 @@ function Fenglib:CreateWindow(Config)
         content.BorderSizePixel = 0
         content.AutomaticSize = Enum.AutomaticSize.Y
         content.Parent = main
-        
-        -- 通知内容区域渲染
-        renderContentGlow(content)
 
         local icon = Instance.new("ImageLabel")
         icon.Name = "TypeIcon"
@@ -1483,9 +1302,6 @@ function Fenglib:CreateWindow(Config)
         contentContainer.BackgroundTransparency = 1
         contentContainer.ClipsDescendants = true
         contentContainer.Parent = sectionFrame
-        
-        -- Section内容区域渲染装饰
-        renderContentGlow(contentContainer)
 
         local contentPadding = Instance.new("UIPadding")
         contentPadding.PaddingLeft = UDim.new(0, 10)
@@ -1545,7 +1361,8 @@ function Fenglib:CreateWindow(Config)
             Btn.Size = UDim2.new(1, 0, 0, 44)
             Btn.Text = ""
             Btn.Font = Enum.Font.Gotham
-            Btn.TextSize = 14            Btn.Parent = contentContainer
+            Btn.TextSize = 14
+            Btn.Parent = contentContainer
             Btn.BackgroundTransparency = 0.08
             local corner = Instance.new("UICorner")
             corner.CornerRadius = UDim.new(0, 12)
@@ -2961,7 +2778,7 @@ function Fenglib:CreateWindow(Config)
         return Elements
     end
 
-    -- 双栏Tab（左侧竖条指示器）
+    -- 双栏Tab（左侧竖条指示器，已修复布局）
     function Window:DualTab(name, icon)
         local TabBtn = Instance.new("TextButton")
         TabBtn.Size = UDim2.new(1, 0, 0, 38)
@@ -3051,20 +2868,17 @@ function Fenglib:CreateWindow(Config)
         Columns.BackgroundTransparency = 1
         Columns.Parent = PageFrame
 
+        -- 关键修复：移除 Columns 的 UIPadding，只保留 UIListLayout 的 Padding
         local ColumnsLayout = Instance.new("UIListLayout")
         ColumnsLayout.FillDirection = Enum.FillDirection.Horizontal
-        ColumnsLayout.Padding = UDim.new(0, 12)
+        ColumnsLayout.Padding = UDim.new(0, 12)  -- 左右栏之间的间距
         ColumnsLayout.SortOrder = Enum.SortOrder.LayoutOrder
         ColumnsLayout.Parent = Columns
 
-        local ColumnsPadding = Instance.new("UIPadding")
-        ColumnsPadding.PaddingLeft = UDim.new(0, 6)
-        ColumnsPadding.PaddingRight = UDim.new(0, 6)
-        ColumnsPadding.Parent = Columns
-
+        -- 左栏
         local LeftColumn = Instance.new("ScrollingFrame")
         LeftColumn.Name = "LeftColumn"
-        LeftColumn.Size = UDim2.new(0.5, -6, 1, 0)
+        LeftColumn.Size = UDim2.new(0.5, -6, 1, 0)  -- 各占一半，减去一半间距
         LeftColumn.BackgroundTransparency = 1
         LeftColumn.ScrollingDirection = Enum.ScrollingDirection.Y
         LeftColumn.ScrollBarThickness = 4
@@ -3089,6 +2903,7 @@ function Fenglib:CreateWindow(Config)
         LeftList.SortOrder = Enum.SortOrder.LayoutOrder
         LeftList.Parent = LeftHolder
 
+        -- 右栏
         local RightColumn = Instance.new("ScrollingFrame")
         RightColumn.Name = "RightColumn"
         RightColumn.Size = UDim2.new(0.5, -6, 1, 0)
@@ -3115,6 +2930,19 @@ function Fenglib:CreateWindow(Config)
         RightList.Padding = UDim.new(0, 12)
         RightList.SortOrder = Enum.SortOrder.LayoutOrder
         RightList.Parent = RightHolder
+
+        -- 分割线（视觉优化）
+        local Divider = Instance.new("Frame")
+        Divider.Size = UDim2.new(0, 1, 1, 0)
+        Divider.Position = UDim2.new(0.5, -0.5, 0, 0)
+        Divider.BackgroundTransparency = 0.6
+        Divider.BackgroundColor3 = CurrentTheme.Stroke
+        Divider.BorderSizePixel = 0
+        Divider.Parent = Columns
+
+        table.insert(ThemeListeners, function()
+            Divider.BackgroundColor3 = CurrentTheme.Stroke
+        end)
 
         local function updateLeftCanvas()
             LeftColumn.CanvasSize = UDim2.new(0, 0, 0, LeftList.AbsoluteContentSize.Y + 12)
@@ -3168,9 +2996,20 @@ function Fenglib:CreateWindow(Config)
         if name == "Settings" then TabBtn.LayoutOrder = 99999 end
 
         local DualElements = {}
-        function DualElements:section(side, text, icons, defaultOpen)
+
+        -- 兼容两种写法：支持 Section/section
+        function DualElements:Section(side, text, icons, defaultOpen)
             local holder = side == "Left" and LeftHolder or RightHolder
             return createSection(holder, text, icons, defaultOpen)
+        end
+        DualElements.section = DualElements.Section  -- 别名
+
+        -- 快速创建左右 section 的便捷方法
+        function DualElements:LeftSection(text, icons, defaultOpen)
+            return self:Section("Left", text, icons, defaultOpen)
+        end
+        function DualElements:RightSection(text, icons, defaultOpen)
+            return self:Section("Right", text, icons, defaultOpen)
         end
 
         return DualElements
